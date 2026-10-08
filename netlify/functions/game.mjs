@@ -57,6 +57,25 @@ export default async function handler(req) {
    await store().setJSON(pickKey(code,playerId),{choice,lockedAt:Date.now()});
    return respond({choice,locked:true});
   }
+  if(action==='settle' && req.method==='POST'){
+  if(data.hostToken!==game.hostToken)
+    return respond({error:'Only the host can settle.'},403);
+
+  if(game.status!=='started')
+    return respond({error:'Game not started.'},400);
+
+  if(!['YES','NO'].includes(data.result))
+    return respond({error:'Choose YES or NO.'},400);
+
+  await store().setJSON(gameKey(code),{
+    ...game,
+    status:'settled',
+    result:data.result,
+    settledAt:Date.now()
+  });
+
+  return respond({status:'settled',result:data.result});
+}
   if(action==='state' && req.method==='GET'){
    const listed=await store().list({prefix:`player-${code}-`});
    const players=(await Promise.all(listed.blobs.map(b=>store().get(b.key,{type:'json'})))).filter(Boolean).sort((a,b)=>a.joinedAt-b.joinedAt).map(p=>({name:p.name,id:p.id}));
