@@ -1,60 +1,160 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05080b">
 <title>Hunch Club</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
-body{min-height:100vh;display:flex;justify-content:center;align-items:center}
-#app{width:min(100vw,430px);height:min(100vh,932px);position:relative;background:#000;overflow:hidden}
-#screen{width:100%;height:100%;object-fit:cover;display:block}
-.hot{position:absolute;border:0;background:transparent;padding:0;cursor:pointer}
-.hot:active{background:rgba(255,210,40,.10)}
-#msg{position:absolute;left:18px;right:18px;bottom:72px;text-align:center;font-size:12px;font-weight:700;color:#ffd83d;text-shadow:0 1px 3px #000;pointer-events:none}
-#modal{position:absolute;inset:0;background:rgba(0,0,0,.74);display:none;align-items:center;justify-content:center;padding:24px}
-#modal .box{width:100%;border:1px solid #ffd83d;border-radius:20px;background:linear-gradient(#101722,#030609);padding:22px;text-align:center;box-shadow:0 0 40px rgba(255,210,50,.18)}
-#modal .lock{font-size:56px}#modal h2{font-size:25px;margin:8px 0}#modal p{color:#d0d5dc;line-height:1.4}
-.modalBtn{width:100%;padding:14px;border-radius:11px;border:0;margin-top:9px;font-weight:900}
-.gold{background:linear-gradient(#ffe46b,#f1ae00);color:#111}.dark{background:#101923;color:#fff;border:1px solid #cbd1d8}
-#name{position:absolute;left:35px;right:35px;top:210px;padding:12px;border-radius:7px;border:1px solid #d7a900;background:#08101a;color:#fff;display:none}
-</style></head>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
+body{display:flex;justify-content:center}
+#app{position:relative;width:min(100vw,430px);height:100vh;min-height:680px;overflow:hidden;background:#000}
+#screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.hot{position:absolute;border:0;background:transparent;border-radius:10px;cursor:pointer;z-index:5}
+.hot:active{background:rgba(255,215,50,.18)}
+.overlay{position:absolute;z-index:10;left:6%;right:6%;pointer-events:none}
+.overlay>*{pointer-events:auto}
+#toast{position:absolute;left:7%;right:7%;bottom:74px;z-index:40;text-align:center;color:#ffd83d;font-weight:800;font-size:12px;text-shadow:0 2px 5px #000;min-height:18px}
+#dynamicPlayers{position:absolute;left:8%;right:8%;top:30%;z-index:7}
+.playerRow{height:37px;margin:2px 0;border:1px solid #b58d18;border-radius:7px;background:rgba(4,10,16,.91);display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:0 8px;font-size:12px;font-weight:800}
+.playerRow .hearts{color:#ff1646;letter-spacing:1px;font-size:14px}.playerRow .out{color:#ff6a80}.playerRow .shield{color:#ffd83d}
+#codeOverlay{position:absolute;left:25%;right:25%;top:24%;z-index:8;text-align:center;color:#ffd83d;font-weight:1000;font-size:22px;letter-spacing:4px;text-shadow:0 2px 4px #000}
+#hostOverlay{position:absolute;left:12%;right:12%;top:29%;z-index:8;text-align:center;font-size:11px;font-weight:800;text-shadow:0 2px 4px #000}
+#roundOverlay{position:absolute;left:20%;right:20%;top:8%;z-index:8;text-align:center;color:#fff;font-weight:900;font-size:12px;text-shadow:0 2px 4px #000}
+#questionOverlay{position:absolute;left:10%;right:10%;top:31%;z-index:8;text-align:center;font-size:19px;line-height:1.08;font-weight:1000;text-shadow:0 2px 4px #000}
+#stateOverlay{position:absolute;left:10%;right:10%;top:76%;z-index:8;text-align:center;color:#fff;font-size:11px;font-weight:900;text-shadow:0 2px 4px #000}
+#lobbyPlayers{position:absolute;left:7%;right:7%;top:31%;z-index:8}
+#predictionPlayers{position:absolute;left:8%;right:8%;top:73%;z-index:8}
+#nameModal,#confirmModal,#hostModal{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:22px}
+.modalBox{width:100%;background:linear-gradient(160deg,#121a23,#030507);border:1px solid #ffd83d;border-radius:18px;padding:20px;box-shadow:0 0 35px rgba(255,210,50,.16)}
+.modalBox h2{margin:4px 0 9px;font-size:24px}.modalBox p{color:#c9ced5;font-size:13px;line-height:1.4}
+input{width:100%;padding:13px;border-radius:9px;border:1px solid #68717b;background:#070c12;color:#fff;outline:none;margin:5px 0}
+.mbtn{width:100%;padding:13px;border:0;border-radius:10px;margin-top:8px;font-weight:1000}
+.gold{background:linear-gradient(#ffe66b,#f1ae00);color:#111}.dark{background:#0d1720;color:#fff;border:1px solid #c8ced5}
+.choiceBtn{position:absolute;z-index:15;border:0;border-radius:9px;padding:0;font-size:0;background:transparent}
+#yesBtn{left:8%;top:67%;width:41%;height:8%}#noBtn{left:52%;top:67%;width:41%;height:8%}
+#lockBtn{left:7%;top:77%;width:86%;height:8%}
+#backBtn{left:4%;top:4%;width:14%;height:7%}
+#homeJoin{left:8%;top:49%;width:84%;height:8%}
+#homeCreate{left:8%;top:59%;width:84%;height:8%}
+#createGameBtn{left:7%;top:89%;width:86%;height:7%}
+#lobbyStart{left:7%;top:89%;width:86%;height:7%}
+#nextBtn{left:7%;top:89%;width:86%;height:7%}
+#championBtn{left:7%;top:89%;width:86%;height:7%}
+#navHome{left:0;bottom:0;width:25%;height:9%}.navGame{left:25%;bottom:0;width:25%;height:9%}.navFriends{left:50%;bottom:0;width:25%;height:9%}.navProfile{left:75%;bottom:0;width:25%;height:9%}
+.hidden{display:none!important}
+.smallnote{text-align:center;color:#c9ced5;font-size:12px}
+</style>
+</head>
 <body>
 <div id="app">
 <img id="screen" src="assets/home.jpg" alt="Hunch Club">
-<div id="name"><input id="nameInput" placeholder="Your name" style="width:100%;background:transparent;border:0;color:white;outline:0"></div>
-<div id="msg"></div>
-<div id="modal"><div class="box"><div class="lock">🔒❤️</div><h2>Lock in your answer?</h2><p>You've chosen <b id="mchoice">YES</b>. Once locked, your prediction cannot be changed.</p><button class="modalBtn gold" id="confirm">🔒 LOCK IN MY HUNCH</button><button class="modalBtn dark" id="back">GO BACK</button></div></div>
+<div id="toast"></div>
+
+<!-- dynamic layers -->
+<div id="codeOverlay" class="hidden"></div><div id="hostOverlay" class="hidden"></div>
+<div id="lobbyPlayers" class="hidden"></div>
+<div id="roundOverlay" class="hidden"></div>
+<div id="questionOverlay" class="hidden">Will Liverpool win away to Man City<br>this weekend?</div>
+<div id="predictionPlayers" class="hidden"></div>
+<div id="stateOverlay" class="hidden"></div>
+
+<!-- transparent interaction areas -->
+<button id="homeJoin" class="hot"></button><button id="homeCreate" class="hot"></button>
+<button id="createGameBtn" class="hot hidden"></button><button id="lobbyStart" class="hot hidden"></button>
+<button id="yesBtn" class="choiceBtn hidden"></button><button id="noBtn" class="choiceBtn hidden"></button>
+<button id="lockBtn" class="hot hidden"></button><button id="backBtn" class="hot hidden"></button>
+<button id="nextBtn" class="hot hidden"></button><button id="championBtn" class="hot hidden"></button>
+<button id="navHome" class="hot"></button><button id="navGame" class="hot"></button><button id="navFriends" class="hot"></button><button id="navProfile" class="hot"></button>
+
+<div id="nameModal"><div class="modalBox">
+<h2 id="nameTitle">Join Hunch Club</h2><p id="nameHelp">Enter your name to continue.</p>
+<input id="nameInput" placeholder="Your name" maxlength="32">
+<input id="codeInput" class="hidden" placeholder="Game code" maxlength="6">
+<button id="nameGo" class="mbtn gold">CONTINUE</button><button id="nameCancel" class="mbtn dark">GO BACK</button>
+</div></div>
+
+<div id="confirmModal"><div class="modalBox" style="text-align:center">
+<div style="font-size:56px">🔒❤️</div><div style="color:#ffd83d;font-size:12px;font-weight:1000;letter-spacing:1px">CONFIRM YOUR HUNCH</div>
+<h2>Lock in your answer?</h2><p>You've chosen <b id="confirmChoice">YES</b>. Once locked, your prediction cannot be changed.</p>
+<div style="border:1px solid #59636e;border-radius:12px;padding:12px;margin:12px 0;background:#071019"><div class="smallnote">YOUR PREDICTION</div><div id="confirmValue" style="font-size:29px;font-weight:1000;color:#46ef69">YES</div></div>
+<button id="confirmGo" class="mbtn gold">🔒 LOCK IN MY HUNCH</button><button id="confirmBack" class="mbtn dark">GO BACK</button>
+</div></div>
+
+<div id="hostModal"><div class="modalBox">
+<h2>Set the result</h2><p>For this test round, choose the actual result after everyone has locked in.</p>
+<button id="settleYes" class="mbtn gold">CORRECT ANSWER: YES</button>
+<button id="settleNo" class="mbtn dark">CORRECT ANSWER: NO</button>
+<button id="hostClose" class="mbtn dark">CLOSE</button>
+</div></div>
 </div>
+
 <script>
-const $=s=>document.querySelector(s), app=$("#app"), screen=$("#screen"), msg=$("#msg");
-let page="home",session=null,pending=null;
-const pages=["home","create","lobby","prediction","confirm","leaderboard","shield","progress","result","champion"];
-function setPage(p){page=p;screen.src="assets/"+p+".jpg";msg.textContent="";document.querySelectorAll(".hot").forEach(x=>x.remove());bind(p)}
-function button(x,y,w,h,fn){let b=document.createElement("button");b.className="hot";b.style.cssText=`left:${x}%;top:${y}%;width:${w}%;height:${h}%;`;b.onclick=fn;app.appendChild(b)}
-function bind(p){
- if(p==="home"){
-  button(8,48,84,10,()=>setPage("create"));
-  button(8,58,84,9,()=>joinPrompt());
-  button(0,0,100,100,()=>{}); // background remains inert except buttons added above
- }
- if(p==="create"){button(6,88,88,9,createGame);button(6,12,14,8,()=>setPage("home"))}
- if(p==="lobby"){button(7,82,88,9,startGame);button(6,6,13,8,()=>setPage("home"))}
- if(p==="prediction"){
-  button(7,67,42,9,()=>choose("YES"));button(52,67,41,9,()=>choose("NO"));
-  button(6,78,88,9,()=>{if(pending)openModal()});button(5,6,12,8,()=>setPage("lobby"))
- }
- if(p==="result"){button(7,88,88,8,()=>setPage("prediction"))}
- if(p==="champion"){button(7,88,88,8,()=>setPage("leaderboard"))}
+const $=id=>document.getElementById(id);
+let page='home',session=null,pending=null,busy=false,lastState=null;
+const screens=['home','create','lobby','prediction','confirm','leaderboard','shield','progress','result','champion'];
+function toast(s){$('toast').textContent=s||''}
+function clearLayers(){['codeOverlay','hostOverlay','lobbyPlayers','roundOverlay','questionOverlay','predictionPlayers','stateOverlay'].forEach(id=>$(id).classList.add('hidden'));['homeJoin','homeCreate','createGameBtn','lobbyStart','yesBtn','noBtn','lockBtn','backBtn','nextBtn','championBtn'].forEach(id=>$(id).classList.add('hidden'))}
+function setPage(p){page=p;clearLayers();$('screen').src='assets/'+p+'.jpg';toast('');
+  if(p==='home'){show('homeJoin');show('homeCreate')}
+  if(p==='create'){show('createGameBtn');show('backBtn')}
+  if(p==='lobby'){show('lobbyStart');show('backBtn');show('codeOverlay');show('hostOverlay');show('lobbyPlayers');renderLobby()}
+  if(p==='prediction'){show('yesBtn');show('noBtn');show('lockBtn');show('backBtn');show('roundOverlay');show('questionOverlay');show('predictionPlayers');renderGame()}
+  if(p==='confirm'){show('backBtn')}
+  if(p==='progress'){show('roundOverlay');show('stateOverlay');show('predictionPlayers');renderProgress()}
+  if(p==='result'){show('roundOverlay');show('predictionPlayers');renderResult()}
+  if(p==='champion'){show('championBtn');show('roundOverlay')}
 }
-function showMsg(s){msg.textContent=s}
-function joinPrompt(){let c=prompt("Enter game code");let n=prompt("Your name");if(!c||!n)return;session={code:c.toUpperCase(),playerId:null,name:n};showMsg("Joining game…");join(n,c)}
-async function api(action,payload={}){let r=await fetch("/api/game?action="+action,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});let j=await r.json();if(!r.ok)throw Error(j.error||"Request failed");return j}
-async function createGame(){let n=prompt("Your name");if(!n)return;try{let r=await api("create",{name:n});session=r;localStorage.setItem("hcSession",JSON.stringify(session));setPage("lobby");showMsg("Game created — code "+r.code)}catch(e){showMsg(e.message)}}
-async function join(n,c){try{let r=await api("join",{name:n,code:c});session={...session,...r};localStorage.setItem("hcSession",JSON.stringify(session));setPage("lobby")}catch(e){showMsg(e.message)}}
-async function startGame(){if(!session?.hostToken){setPage("prediction");return}try{await api("start",{code:session.code,hostToken:session.hostToken});setPage("prediction")}catch(e){showMsg(e.message)}}
-function choose(c){pending=c;openModal()}
-function openModal(){$("#mchoice").textContent=pending;$("#modal").style.display="flex"}
-$("#back").onclick=()=>$("#modal").style.display="none";
-$("#confirm").onclick=async()=>{try{if(session?.playerId){await api("pick",{code:session.code,playerId:session.playerId,choice:pending})}$("#modal").style.display="none";setPage("progress");showMsg("Hunch locked — "+pending)}catch(e){showMsg(e.message);$("#modal").style.display="none"}}
-try{let s=localStorage.getItem("hcSession");if(s)session=JSON.parse(s)}catch{}
-setPage("home");
-</script></div></body></html>
+function show(id){$(id).classList.remove('hidden')}
+function hide(id){$(id).classList.add('hidden')}
+function openName(mode){
+ $('nameModal').style.display='flex';$('nameInput').value='';$('codeInput').value='';
+ $('nameTitle').textContent=mode==='create'?'Create a game':'Join Hunch Club';
+ $('nameHelp').textContent=mode==='create'?'Enter your name to create the club.':'Enter your name and the 6-character game code.';
+ $('codeInput').classList.toggle('hidden',mode==='create');$('nameGo').dataset.mode=mode;
+ setTimeout(()=>$('nameInput').focus(),50)
+}
+function closeName(){$('nameModal').style.display='none'}
+async function api(action,payload){
+ const post=payload!==undefined;
+ const url='/api/game?action='+encodeURIComponent(action)+(post?'':'&code='+encodeURIComponent(session.code)+'&playerId='+encodeURIComponent(session.playerId));
+ const r=await fetch(url,post?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)}:{});
+ let d;try{d=await r.json()}catch{throw Error('Server unavailable')}
+ if(!r.ok)throw Error(d.error||'Request failed');return d
+}
+function save(){localStorage.setItem('hunchClubNetlifyV4',JSON.stringify(session))}
+async function createGame(name){if(busy)return;busy=true;toast('Creating game…');try{let r=await api('create',{name});session={code:r.code,playerId:r.playerId,hostToken:r.hostToken};save();setPage('lobby');await refresh()}catch(e){toast(e.message)}finally{busy=false}}
+async function joinGame(name,code){if(busy)return;busy=true;toast('Joining game…');try{let r=await api('join',{name,code:code.toUpperCase()});session={code:r.code,playerId:r.playerId};save();setPage('lobby');await refresh()}catch(e){toast(e.message)}finally{busy=false}}
+async function refresh(){if(!session||busy)return;try{let s=await api('state');lastState=s;
+ if(s.status==='Waiting'){if(page!=='lobby')setPage('lobby');renderLobby()}
+ else if(s.status==='Started'){if(page!=='prediction'&&page!=='progress')setPage('prediction');renderGame()}
+ else if(s.status==='Settled'){if(page!=='result')setPage('result');renderResult()}
+ else if(s.status==='Finished'){if(page!=='champion')setPage('champion');renderChampion()}
+ }catch(e){toast(e.message)}}
+function hearts(p){return p.alive?'❤️❤️❤️':'🖤🖤🖤'}
+function playerRows(players){return players.map(p=>`<div class="playerRow"><span>${escape(p.name)}${p.id===session?.playerId?' <b style="color:#ffd83d">(YOU)</b>':''}</span><span class="hearts">${hearts(p)}</span><span class="${p.alive?'shield':'out'}">${p.alive?'🛡️':'OUT'}</span></div>`).join('')}
+function renderLobby(){if(!lastState)return;$('codeOverlay').textContent=lastState.code||session.code;$('hostOverlay').textContent='Created by: '+(lastState.hostName||'Host');$('lobbyPlayers').innerHTML=playerRows(lastState.players||[])}
+function renderGame(){if(!lastState)return;$('roundOverlay').textContent='Premier League · Round '+(lastState.round||1);$('predictionPlayers').innerHTML=playerRows(lastState.players||[]);$('stateOverlay').textContent=lastState.ownPick?'HUNCH LOCKED — Your prediction: '+lastState.ownPick:'Choose YES or NO to lock your hunch.';if(lastState.ownPick){hide('yesBtn');hide('noBtn');$('lockBtn').textContent='HUNCH LOCKED ✓';$('lockBtn').disabled=true}}
+function renderProgress(){if(!lastState)return;$('roundOverlay').textContent='Round '+(lastState.round||1)+' of 10';$('stateOverlay').textContent='🔒 Predictions locked! Waiting for the result…';$('predictionPlayers').innerHTML=playerRows(lastState.players||[])}
+function renderResult(){if(!lastState)return;$('roundOverlay').textContent='Round '+(lastState.round||1);$('predictionPlayers').innerHTML=playerRows(lastState.players||[]);toast(lastState.ownAlive?'✓ Correct — you survived!':'✕ You are OUT');if(session?.hostToken)show('nextBtn')}
+function renderChampion(){if(!lastState)return;$('roundOverlay').textContent='FINAL RESULT';$('predictionPlayers').innerHTML=playerRows(lastState.players||[])}
+function escape(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+$('homeJoin').onclick=()=>openName('join');$('homeCreate').onclick=()=>openName('create');$('nameCancel').onclick=closeName;
+$('nameGo').onclick=async()=>{let n=$('nameInput').value.trim(),m=$('nameGo').dataset.mode;if(!n)return toast('Enter your name.');closeName();if(m==='create')await createGame(n);else{let c=$('codeInput').value.trim();if(c.length!==6)return toast('Enter the 6-character game code.');await joinGame(n,c)}};
+$('backBtn').onclick=()=>setPage(page==='lobby'?'home':'lobby');
+$('lobbyStart').onclick=async()=>{if(!session?.hostToken)return toast('Only the host can start the game.');try{await api('start',{code:session.code,hostToken:session.hostToken});await refresh()}catch(e){toast(e.message)}};
+$('yesBtn').onclick=()=>{pending='YES';$('confirmChoice').textContent='YES';$('confirmValue').textContent='YES';$('confirmModal').style.display='flex'};
+$('noBtn').onclick=()=>{pending='NO';$('confirmChoice').textContent='NO';$('confirmValue').textContent='NO';$('confirmModal').style.display='flex'};
+$('confirmBack').onclick=()=>{$('confirmModal').style.display='none';pending=null};
+$('confirmGo').onclick=async()=>{if(!pending)return;$('confirmModal').style.display='none';try{await api('pick',{code:session.code,playerId:session.playerId,choice:pending});pending=null;setPage('progress');await refresh()}catch(e){toast(e.message)}};
+$('lockBtn').onclick=()=>{if(!lastState?.ownPick){pending=null;toast('Choose YES or NO first.')}}
+$('nextBtn').onclick=async()=>{try{await api('next',{code:session.code,hostToken:session.hostToken});await refresh()}catch(e){toast(e.message)}};
+$('championBtn').onclick=()=>setPage('leaderboard');
+$('navHome').onclick=()=>setPage('home');$('navGame').onclick=()=>session?setPage(lastState?.status==='Waiting'?'lobby':'prediction'):setPage('home');$('navFriends').onclick=()=>toast('Friends screen coming next.');$('navProfile').onclick=()=>toast('Profile screen coming next.');
+$('hostModal').onclick=e=>{if(e.target===$('hostModal'))$('hostModal').style.display='none'};
+try{session=JSON.parse(localStorage.getItem('hunchClubNetlifyV4')||'null')}catch{session=null}
+setPage('home');if(session)refresh();setInterval(()=>{if(session&&!busy)refresh()},3500);
+</script>
+</body>
+</html>
