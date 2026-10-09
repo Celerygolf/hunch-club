@@ -1,160 +1,42 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#05080b">
-<title>Hunch Club</title>
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
-body{display:flex;justify-content:center}
-#app{position:relative;width:min(100vw,430px);height:100vh;min-height:680px;overflow:hidden;background:#000}
-#screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.hot{position:absolute;border:0;background:transparent;border-radius:10px;cursor:pointer;z-index:5}
-.hot:active{background:rgba(255,215,50,.18)}
-.overlay{position:absolute;z-index:10;left:6%;right:6%;pointer-events:none}
-.overlay>*{pointer-events:auto}
-#toast{position:absolute;left:7%;right:7%;bottom:74px;z-index:40;text-align:center;color:#ffd83d;font-weight:800;font-size:12px;text-shadow:0 2px 5px #000;min-height:18px}
-#dynamicPlayers{position:absolute;left:8%;right:8%;top:30%;z-index:7}
-.playerRow{height:37px;margin:2px 0;border:1px solid #b58d18;border-radius:7px;background:rgba(4,10,16,.91);display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:0 8px;font-size:12px;font-weight:800}
-.playerRow .hearts{color:#ff1646;letter-spacing:1px;font-size:14px}.playerRow .out{color:#ff6a80}.playerRow .shield{color:#ffd83d}
-#codeOverlay{position:absolute;left:25%;right:25%;top:24%;z-index:8;text-align:center;color:#ffd83d;font-weight:1000;font-size:22px;letter-spacing:4px;text-shadow:0 2px 4px #000}
-#hostOverlay{position:absolute;left:12%;right:12%;top:29%;z-index:8;text-align:center;font-size:11px;font-weight:800;text-shadow:0 2px 4px #000}
-#roundOverlay{position:absolute;left:20%;right:20%;top:8%;z-index:8;text-align:center;color:#fff;font-weight:900;font-size:12px;text-shadow:0 2px 4px #000}
-#questionOverlay{position:absolute;left:10%;right:10%;top:31%;z-index:8;text-align:center;font-size:19px;line-height:1.08;font-weight:1000;text-shadow:0 2px 4px #000}
-#stateOverlay{position:absolute;left:10%;right:10%;top:76%;z-index:8;text-align:center;color:#fff;font-size:11px;font-weight:900;text-shadow:0 2px 4px #000}
-#lobbyPlayers{position:absolute;left:7%;right:7%;top:31%;z-index:8}
-#predictionPlayers{position:absolute;left:8%;right:8%;top:73%;z-index:8}
-#nameModal,#confirmModal,#hostModal{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:22px}
-.modalBox{width:100%;background:linear-gradient(160deg,#121a23,#030507);border:1px solid #ffd83d;border-radius:18px;padding:20px;box-shadow:0 0 35px rgba(255,210,50,.16)}
-.modalBox h2{margin:4px 0 9px;font-size:24px}.modalBox p{color:#c9ced5;font-size:13px;line-height:1.4}
-input{width:100%;padding:13px;border-radius:9px;border:1px solid #68717b;background:#070c12;color:#fff;outline:none;margin:5px 0}
-.mbtn{width:100%;padding:13px;border:0;border-radius:10px;margin-top:8px;font-weight:1000}
-.gold{background:linear-gradient(#ffe66b,#f1ae00);color:#111}.dark{background:#0d1720;color:#fff;border:1px solid #c8ced5}
-.choiceBtn{position:absolute;z-index:15;border:0;border-radius:9px;padding:0;font-size:0;background:transparent}
-#yesBtn{left:8%;top:67%;width:41%;height:8%}#noBtn{left:52%;top:67%;width:41%;height:8%}
-#lockBtn{left:7%;top:77%;width:86%;height:8%}
-#backBtn{left:4%;top:4%;width:14%;height:7%}
-#homeJoin{left:8%;top:49%;width:84%;height:8%}
-#homeCreate{left:8%;top:59%;width:84%;height:8%}
-#createGameBtn{left:7%;top:89%;width:86%;height:7%}
-#lobbyStart{left:7%;top:89%;width:86%;height:7%}
-#nextBtn{left:7%;top:89%;width:86%;height:7%}
-#championBtn{left:7%;top:89%;width:86%;height:7%}
-#navHome{left:0;bottom:0;width:25%;height:9%}.navGame{left:25%;bottom:0;width:25%;height:9%}.navFriends{left:50%;bottom:0;width:25%;height:9%}.navProfile{left:75%;bottom:0;width:25%;height:9%}
-.hidden{display:none!important}
-.smallnote{text-align:center;color:#c9ced5;font-size:12px}
-</style>
-</head>
-<body>
-<div id="app">
-<img id="screen" src="assets/home.jpg" alt="Hunch Club">
-<div id="toast"></div>
-
-<!-- dynamic layers -->
-<div id="codeOverlay" class="hidden"></div><div id="hostOverlay" class="hidden"></div>
-<div id="lobbyPlayers" class="hidden"></div>
-<div id="roundOverlay" class="hidden"></div>
-<div id="questionOverlay" class="hidden">Will Liverpool win away to Man City<br>this weekend?</div>
-<div id="predictionPlayers" class="hidden"></div>
-<div id="stateOverlay" class="hidden"></div>
-
-<!-- transparent interaction areas -->
-<button id="homeJoin" class="hot"></button><button id="homeCreate" class="hot"></button>
-<button id="createGameBtn" class="hot hidden"></button><button id="lobbyStart" class="hot hidden"></button>
-<button id="yesBtn" class="choiceBtn hidden"></button><button id="noBtn" class="choiceBtn hidden"></button>
-<button id="lockBtn" class="hot hidden"></button><button id="backBtn" class="hot hidden"></button>
-<button id="nextBtn" class="hot hidden"></button><button id="championBtn" class="hot hidden"></button>
-<button id="navHome" class="hot"></button><button id="navGame" class="hot"></button><button id="navFriends" class="hot"></button><button id="navProfile" class="hot"></button>
-
-<div id="nameModal"><div class="modalBox">
-<h2 id="nameTitle">Join Hunch Club</h2><p id="nameHelp">Enter your name to continue.</p>
-<input id="nameInput" placeholder="Your name" maxlength="32">
-<input id="codeInput" class="hidden" placeholder="Game code" maxlength="6">
-<button id="nameGo" class="mbtn gold">CONTINUE</button><button id="nameCancel" class="mbtn dark">GO BACK</button>
-</div></div>
-
-<div id="confirmModal"><div class="modalBox" style="text-align:center">
-<div style="font-size:56px">🔒❤️</div><div style="color:#ffd83d;font-size:12px;font-weight:1000;letter-spacing:1px">CONFIRM YOUR HUNCH</div>
-<h2>Lock in your answer?</h2><p>You've chosen <b id="confirmChoice">YES</b>. Once locked, your prediction cannot be changed.</p>
-<div style="border:1px solid #59636e;border-radius:12px;padding:12px;margin:12px 0;background:#071019"><div class="smallnote">YOUR PREDICTION</div><div id="confirmValue" style="font-size:29px;font-weight:1000;color:#46ef69">YES</div></div>
-<button id="confirmGo" class="mbtn gold">🔒 LOCK IN MY HUNCH</button><button id="confirmBack" class="mbtn dark">GO BACK</button>
-</div></div>
-
-<div id="hostModal"><div class="modalBox">
-<h2>Set the result</h2><p>For this test round, choose the actual result after everyone has locked in.</p>
-<button id="settleYes" class="mbtn gold">CORRECT ANSWER: YES</button>
-<button id="settleNo" class="mbtn dark">CORRECT ANSWER: NO</button>
-<button id="hostClose" class="mbtn dark">CLOSE</button>
-</div></div>
-</div>
-
-<script>
-const $=id=>document.getElementById(id);
-let page='home',session=null,pending=null,busy=false,lastState=null;
-const screens=['home','create','lobby','prediction','confirm','leaderboard','shield','progress','result','champion'];
-function toast(s){$('toast').textContent=s||''}
-function clearLayers(){['codeOverlay','hostOverlay','lobbyPlayers','roundOverlay','questionOverlay','predictionPlayers','stateOverlay'].forEach(id=>$(id).classList.add('hidden'));['homeJoin','homeCreate','createGameBtn','lobbyStart','yesBtn','noBtn','lockBtn','backBtn','nextBtn','championBtn'].forEach(id=>$(id).classList.add('hidden'))}
-function setPage(p){page=p;clearLayers();$('screen').src='assets/'+p+'.jpg';toast('');
-  if(p==='home'){show('homeJoin');show('homeCreate')}
-  if(p==='create'){show('createGameBtn');show('backBtn')}
-  if(p==='lobby'){show('lobbyStart');show('backBtn');show('codeOverlay');show('hostOverlay');show('lobbyPlayers');renderLobby()}
-  if(p==='prediction'){show('yesBtn');show('noBtn');show('lockBtn');show('backBtn');show('roundOverlay');show('questionOverlay');show('predictionPlayers');renderGame()}
-  if(p==='confirm'){show('backBtn')}
-  if(p==='progress'){show('roundOverlay');show('stateOverlay');show('predictionPlayers');renderProgress()}
-  if(p==='result'){show('roundOverlay');show('predictionPlayers');renderResult()}
-  if(p==='champion'){show('championBtn');show('roundOverlay')}
-}
-function show(id){$(id).classList.remove('hidden')}
-function hide(id){$(id).classList.add('hidden')}
-function openName(mode){
- $('nameModal').style.display='flex';$('nameInput').value='';$('codeInput').value='';
- $('nameTitle').textContent=mode==='create'?'Create a game':'Join Hunch Club';
- $('nameHelp').textContent=mode==='create'?'Enter your name to create the club.':'Enter your name and the 6-character game code.';
- $('codeInput').classList.toggle('hidden',mode==='create');$('nameGo').dataset.mode=mode;
- setTimeout(()=>$('nameInput').focus(),50)
-}
-function closeName(){$('nameModal').style.display='none'}
-async function api(action,payload){
- const post=payload!==undefined;
- const url='/api/game?action='+encodeURIComponent(action)+(post?'':'&code='+encodeURIComponent(session.code)+'&playerId='+encodeURIComponent(session.playerId));
- const r=await fetch(url,post?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)}:{});
- let d;try{d=await r.json()}catch{throw Error('Server unavailable')}
- if(!r.ok)throw Error(d.error||'Request failed');return d
-}
-function save(){localStorage.setItem('hunchClubNetlifyV4',JSON.stringify(session))}
-async function createGame(name){if(busy)return;busy=true;toast('Creating game…');try{let r=await api('create',{name});session={code:r.code,playerId:r.playerId,hostToken:r.hostToken};save();setPage('lobby');await refresh()}catch(e){toast(e.message)}finally{busy=false}}
-async function joinGame(name,code){if(busy)return;busy=true;toast('Joining game…');try{let r=await api('join',{name,code:code.toUpperCase()});session={code:r.code,playerId:r.playerId};save();setPage('lobby');await refresh()}catch(e){toast(e.message)}finally{busy=false}}
-async function refresh(){if(!session||busy)return;try{let s=await api('state');lastState=s;
- if(s.status==='Waiting'){if(page!=='lobby')setPage('lobby');renderLobby()}
- else if(s.status==='Started'){if(page!=='prediction'&&page!=='progress')setPage('prediction');renderGame()}
- else if(s.status==='Settled'){if(page!=='result')setPage('result');renderResult()}
- else if(s.status==='Finished'){if(page!=='champion')setPage('champion');renderChampion()}
- }catch(e){toast(e.message)}}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#020407"><title>Hunch Club — Trust your gut. Stay in.</title><style>
+:root{--gold:#ffd64c;--gold2:#e6a617;--red:#f61948;--ink:#05080c;--panel:#07101a;--line:#76602a;--green:#06c544}*{box-sizing:border-box}html,body{margin:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:default}.app{width:min(100%,430px);margin:auto;min-height:100dvh;position:relative;isolation:isolate;overflow:hidden;padding-bottom:70px;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.78)),url('assets/stadium.svg') center top / cover fixed #020407}.app:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.25) 45%,rgba(0,0,0,.85) 100%)}.screen{padding:12px 18px 24px;min-height:calc(100dvh - 70px)}.top{display:flex;align-items:center;justify-content:space-between;height:37px;margin-bottom:10px}.top h1{font-size:15px;color:#ffe269;letter-spacing:.7px;margin:0;text-align:center}.back,.tool{border:0;background:none;color:var(--gold);font-size:27px;min-width:34px}.top .tool{font-size:18px}.goldtext{color:var(--gold)}.hero{text-align:center;padding-top:36px}.monogram{width:190px;height:160px;margin:0 auto;position:relative;display:grid;place-items:center;filter:drop-shadow(0 0 15px #bb750066)}.monogram .letters{font-family:Georgia,serif;font-size:116px;font-weight:900;letter-spacing:-17px;padding-right:15px;background:linear-gradient(135deg,#fff2a0 0%,#ffc32c 38%,#a36504 72%,#fff0a2);color:transparent;background-clip:text;-webkit-background-clip:text;text-shadow:0 7px 16px #0005}.monogram .crown{position:absolute;top:-24px;left:58px;font-size:62px;transform:rotate(-8deg);filter:drop-shadow(0 4px 3px #000)}.monogram .heart{position:absolute;bottom:13px;right:7px;font-size:57px;filter:drop-shadow(0 3px 9px #ff002288)}.heroTitle{font-family:Georgia,serif;color:#ffdf63;font-size:32px;font-weight:900;letter-spacing:1px;text-shadow:0 2px 8px #000;margin:1px 0 4px}.tagline{font-family:Georgia,serif;font-size:15px;margin:0 0 25px}.goldbtn,.darkbtn,.redbtn,.yesbtn,.nobtn{display:block;width:100%;min-height:46px;border-radius:8px;padding:12px 14px;font-size:14px;font-weight:900;letter-spacing:.2px}.goldbtn{background:linear-gradient(180deg,#ffe77c,#ffce4c 48%,#e9a509);border:1px solid #f8d660;color:#111;box-shadow:0 4px 10px #0008}.darkbtn{background:linear-gradient(180deg,#111b26,#050a0e);border:1px solid #b1c0c8;color:#fff}.redbtn,.nobtn{background:linear-gradient(#ff315b,#d9002b);border:1px solid #ff8c9e;color:white}.yesbtn{background:linear-gradient(#08da52,#009a30);border:1px solid #7dff9f;color:white}.goldbtn:active,.darkbtn:active,.yesbtn:active,.nobtn:active{transform:translateY(1px)}.homeActions{padding:0 14px}.homeActions button+button{margin-top:9px}.categoryRibbon{text-align:center;color:#ffe065;font-size:11px;letter-spacing:.5px;line-height:2;margin-top:30px;padding:10px 2px;border:1px solid #aa8a31;border-radius:9px;background:#010407bb}.panel{background:linear-gradient(165deg,rgba(5,12,19,.96),rgba(1,5,8,.97));border:1px solid #bd932a;border-radius:9px;padding:12px;margin:10px 0;box-shadow:0 5px 15px #0008}.panel h2{font-size:17px;margin:4px 0 10px}.eyebrow{color:#ffdb62;font-weight:900;font-size:11px;letter-spacing:.5px}.small{font-size:12px;color:#d4d8dc;line-height:1.45}.center{text-align:center}.goldball{font-size:35px}.gameHeader{display:flex;align-items:center;gap:12px}.gameHeader strong{font-size:13px}.formRow{display:flex;gap:6px}.numbers{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:7px 0 15px}.number{border:1px solid #4e5965;border-radius:5px;background:#0c1722;color:white;padding:10px 0;font-weight:900}.number.active,.category.active{background:linear-gradient(#ffe47b,#e9a80c);border-color:#ffde62;color:#111}.categories{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:7px 0}.category{min-height:59px;border:1px solid #384653;border-radius:7px;background:#07101a;color:white;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.category span{font-size:22px}.toggleRow{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #34404a;padding:10px 2px;font-size:12px}.switch{border:1px solid #e2aa26;border-radius:25px;background:#303946;width:46px;height:26px;padding:2px;text-align:left}.switch:before{content:'';display:block;width:20px;height:20px;border-radius:50%;background:#fff}.switch.on{background:#ffc933}.switch.on:before{margin-left:19px}.input{width:100%;padding:12px;background:#08121d;border:1px solid #607080;color:white;border-radius:7px;margin:7px 0}.input:focus{outline:2px solid var(--gold)}.player{display:grid;grid-template-columns:32px 1fr auto 25px;align-items:center;gap:7px;min-height:44px;padding:5px 7px;border:1px solid #46515b;border-radius:7px;background:#050c12e8;margin:5px 0}.avatar{border:2px solid #ffd64c;border-radius:50%;background:#1d2530;display:grid;place-items:center;width:30px;height:30px;font-size:18px}.playerName{font-size:12px;font-weight:900;overflow:hidden;text-overflow:ellipsis}.lifeHearts{color:var(--red);white-space:nowrap;font-size:19px}.shieldIcon{font-size:20px;color:var(--gold)}.status{font-size:11px;color:#ffe56b}.pill{display:inline-block;padding:5px 9px;border:1px solid #8b6e2c;background:#1b1506;border-radius:999px;color:#ffdb61;font-size:11px;font-weight:900}.code{font-size:32px;letter-spacing:5px;font-weight:900;color:#ffdf66;text-align:center;padding:8px 0}.banner{background:linear-gradient(95deg,#9d6100,#ffdc56,#9b6300);color:#1b1200;text-align:center;padding:9px;font-size:12px;font-weight:900;clip-path:polygon(0 0,100% 0,95% 50%,100% 100%,0 100%,5% 50%);margin:10px 0}.fixture{background:radial-gradient(ellipse at 50% 30%,#af66103d,transparent 62%),linear-gradient(#080b0ddd,#05080ccc);border:1px solid #b58424;border-radius:9px;padding:14px 8px;margin:10px 0}.fixtureTeams{display:grid;grid-template-columns:1fr 40px 1fr;align-items:center;gap:4px;text-align:center}.teamLogo{font-size:58px;line-height:1.1;filter:drop-shadow(0 4px 3px #000)}.teamName{font-size:12px;font-weight:900}.versus{font-family:Georgia,serif;font-weight:900;font-size:27px;color:#ffda57}.question{font-size:22px;line-height:1.12;font-weight:900;text-align:center;margin:16px 0 12px}.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px}.lifeBar{display:flex;align-items:center;justify-content:space-between;margin:10px 4px;font-size:12px}.selected{outline:3px solid #ffe466;outline-offset:2px}.resultPanel{text-align:center;border:1px solid #12c948;border-radius:8px;background:#06160bdc;padding:16px;margin:12px 0}.resultPanel.bad{border-color:#ff2b53;background:#24060d}.resultPanel h2{color:#40ed6d;font-size:26px;margin:6px 0}.resultPanel.bad h2{color:#ff5374}.rank{display:grid;grid-template-columns:30px 1fr auto auto;gap:8px;align-items:center;padding:10px 3px;border-bottom:1px solid #33404a;font-size:12px}.rankNum{font-weight:900;color:var(--gold);font-size:16px}.winner{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.winner .trophy{font-size:110px;filter:drop-shadow(0 0 25px #e7a71d)}.winner h2{font-family:Georgia,serif;font-size:43px;color:var(--gold);margin:0;text-shadow:0 5px 15px #000}.winner p{font-size:16px}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,430px);height:68px;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);background:#010407ed;border-top:1px solid #47505a}.tab{border:0;background:none;color:#bec5cd;font-size:10px}.tab span{display:block;font-size:23px}.tab.active{color:var(--gold);font-weight:900}.modalBack{position:fixed;inset:0;z-index:50;background:#000c;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}.hidden{display:none!important}.modal{width:min(100%,390px);border:1px solid #d7a63c;border-radius:15px;padding:22px 17px;background:linear-gradient(#0b1621,#030609);box-shadow:0 0 60px #000;text-align:center}.modal .lockHeart{font-size:64px;filter:drop-shadow(0 0 15px #f0184a)}.modal h2{font-size:25px}.modal .preview{padding:13px;margin:14px 0;border:1px solid #576571;border-radius:9px;background:#080e15}.modal .preview b{font-size:30px;color:#52f273}.modal button+button{margin-top:9px}.message{color:#ffda56;font-size:12px;text-align:center;min-height:20px;margin:6px 0;font-weight:800}.stack>*+*{margin-top:9px}@media(min-height:780px){.hero{padding-top:60px}.monogram{height:185px}.categoryRibbon{margin-top:55px}}@media(max-width:355px){.screen{padding-left:11px;padding-right:11px}.teamLogo{font-size:46px}.question{font-size:19px}}
+</style></head><body><main class="app"><div class="screen" id="view"></div><div class="message" id="message" role="status" aria-live="polite"></div><nav class="bottom"><button id="tabHome" class="tab active"><span>⌂</span>Home</button><button id="tabGame" class="tab"><span>🏆</span>My Games</button><button id="tabFriends" class="tab"><span>♟</span>Friends</button><button id="tabProfile" class="tab"><span>♙</span>Profile</button></nav></main><div class="modalBack hidden" id="modal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div id="modalIcon" class="lockHeart">🔒❤️</div><div id="modalEye" class="eyebrow">CONFIRM YOUR HUNCH</div><h2 id="modalTitle">Lock in your answer?</h2><p id="modalDesc" class="small"></p><div class="preview"><div class="small">YOUR PREDICTION</div><b id="modalPreview">YES</b></div><button id="modalOk" class="goldbtn">🔒 LOCK IN MY HUNCH</button><button id="modalCancel" class="darkbtn">GO BACK</button></div></div><script>
+const $=id=>document.getElementById(id),view=$('view'),msg=s=>$('message').textContent=s||'';
+let session=null,state=null,selected=null,busy=false,modalAction=null,chosenPlayers=6,chosenCategories=['Football'],livesOn=true,shieldOn=true,viewName='home';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const save=()=>localStorage.setItem('hunchClubNetlifyV4',JSON.stringify(session));
+async function api(a,p){const post=p!==undefined,u='/api/game?action='+encodeURIComponent(a)+(post?'':'&code='+encodeURIComponent(session.code)+'&playerId='+encodeURIComponent(session.playerId));const r=await fetch(u,post?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(p)}:{});const d=await r.json().catch(()=>({error:'Server unavailable'}));if(!r.ok)throw Error(d.error||'Request failed');return d}
+function setActive(n){document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',i===n))}
+function top(title,back=true){return `<header class="top"><button class="back" onclick="goBack()" ${back?'':'style="visibility:hidden"'} aria-label="Back">‹</button><h1>${title}</h1><span class="tool">♧</span></header>`}
+function hero(){return `<div class="hero"><div class="monogram"><div class="crown">👑</div><div class="letters">HC</div><div class="heart">❤️</div></div><div class="heroTitle">HUNCH CLUB</div><p class="tagline">Trust your gut. Stay in.</p></div>`}
+function home(){viewName='home';setActive(0);view.innerHTML=hero()+`<div class="homeActions"><button class="goldbtn" onclick="joinPage()">JOIN A GAME</button><button class="darkbtn" onclick="createPage()">CREATE A GAME</button></div><div class="categoryRibbon">FOOTBALL · DARTS · GOLF · BOXING<br>TV · ENTERTAINMENT · REAL WORLD · WILDCARDS</div>`;msg('')}
+function createPage(){viewName='create';setActive(1);view.innerHTML=top('CREATE A GAME')+`<div class="panel"><div class="gameHeader"><div class="goldball">⚽</div><div><strong>Premier League Predictors</strong><div class="small">Last one standing. Trust your gut.</div></div></div><hr style="border:0;border-top:1px solid #927124"><label class="eyebrow">YOUR NAME</label><input id="hostName" class="input" placeholder="Enter your name" autocomplete="name"><div class="eyebrow" style="margin-top:8px">NUMBER OF PLAYERS</div><div class="numbers">${[2,3,4,5,6].map(n=>`<button class="number ${chosenPlayers===n?'active':''}" onclick="setPlayers(${n})">${n}</button>`).join('')}</div><div class="eyebrow">SELECT CATEGORIES</div><div class="categories">${[['⚽','Football'],['🎯','Darts'],['⛳','Golf'],['🥊','Boxing'],['📺','TV'],['🎭','Entertainment'],['🌍','Real World'],['✨','Wildcards']].map(([e,n])=>`<button class="category ${chosenCategories.includes(n)?'active':''}" onclick="toggleCategory('${n}')"><span>${e}</span>${n}</button>`).join('')}</div><div class="toggleRow">⚙ Use Lives <button class="switch ${livesOn?'on':''}" aria-label="Toggle lives" onclick="livesOn=!livesOn;createPage()"></button></div><div class="toggleRow">⚙ Use Shield Round <button class="switch ${shieldOn?'on':''}" aria-label="Toggle shield" onclick="shieldOn=!shieldOn;createPage()"></button></div></div><button class="goldbtn" onclick="createGame()">CREATE GAME</button><p class="small center">Football is the live test category. Other category options are previews.</p>`;}
+function setPlayers(n){const el=$('hostName');const name=el?.value||'';chosenPlayers=n;createPage();$('hostName').value=name}
+function toggleCategory(n){const name=$('hostName')?.value||'';if(n!=='Football'){msg('Only football questions are active in this test build.');return}chosenCategories=['Football'];createPage();$('hostName').value=name}
+function joinPage(){viewName='join';setActive(1);view.innerHTML=top('JOIN A GAME')+`<div class="panel"><div class="gameHeader"><div class="goldball">⚽</div><div><strong>Join the Club</strong><div class="small">Enter your name and your friend's game code.</div></div></div><label class="eyebrow">YOUR NAME</label><input class="input" id="joinName" placeholder="Your name" autocomplete="name"><label class="eyebrow">GAME CODE</label><input class="input" id="joinCode" placeholder="6-character code" maxlength="6" autocapitalize="characters"></div><button class="goldbtn" onclick="joinGame()">JOIN GAME</button>`;msg('')}
 function hearts(p){return p.alive?'❤️❤️❤️':'🖤🖤🖤'}
-function playerRows(players){return players.map(p=>`<div class="playerRow"><span>${escape(p.name)}${p.id===session?.playerId?' <b style="color:#ffd83d">(YOU)</b>':''}</span><span class="hearts">${hearts(p)}</span><span class="${p.alive?'shield':'out'}">${p.alive?'🛡️':'OUT'}</span></div>`).join('')}
-function renderLobby(){if(!lastState)return;$('codeOverlay').textContent=lastState.code||session.code;$('hostOverlay').textContent='Created by: '+(lastState.hostName||'Host');$('lobbyPlayers').innerHTML=playerRows(lastState.players||[])}
-function renderGame(){if(!lastState)return;$('roundOverlay').textContent='Premier League · Round '+(lastState.round||1);$('predictionPlayers').innerHTML=playerRows(lastState.players||[]);$('stateOverlay').textContent=lastState.ownPick?'HUNCH LOCKED — Your prediction: '+lastState.ownPick:'Choose YES or NO to lock your hunch.';if(lastState.ownPick){hide('yesBtn');hide('noBtn');$('lockBtn').textContent='HUNCH LOCKED ✓';$('lockBtn').disabled=true}}
-function renderProgress(){if(!lastState)return;$('roundOverlay').textContent='Round '+(lastState.round||1)+' of 10';$('stateOverlay').textContent='🔒 Predictions locked! Waiting for the result…';$('predictionPlayers').innerHTML=playerRows(lastState.players||[])}
-function renderResult(){if(!lastState)return;$('roundOverlay').textContent='Round '+(lastState.round||1);$('predictionPlayers').innerHTML=playerRows(lastState.players||[]);toast(lastState.ownAlive?'✓ Correct — you survived!':'✕ You are OUT');if(session?.hostToken)show('nextBtn')}
-function renderChampion(){if(!lastState)return;$('roundOverlay').textContent='FINAL RESULT';$('predictionPlayers').innerHTML=playerRows(lastState.players||[])}
-function escape(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-$('homeJoin').onclick=()=>openName('join');$('homeCreate').onclick=()=>openName('create');$('nameCancel').onclick=closeName;
-$('nameGo').onclick=async()=>{let n=$('nameInput').value.trim(),m=$('nameGo').dataset.mode;if(!n)return toast('Enter your name.');closeName();if(m==='create')await createGame(n);else{let c=$('codeInput').value.trim();if(c.length!==6)return toast('Enter the 6-character game code.');await joinGame(n,c)}};
-$('backBtn').onclick=()=>setPage(page==='lobby'?'home':'lobby');
-$('lobbyStart').onclick=async()=>{if(!session?.hostToken)return toast('Only the host can start the game.');try{await api('start',{code:session.code,hostToken:session.hostToken});await refresh()}catch(e){toast(e.message)}};
-$('yesBtn').onclick=()=>{pending='YES';$('confirmChoice').textContent='YES';$('confirmValue').textContent='YES';$('confirmModal').style.display='flex'};
-$('noBtn').onclick=()=>{pending='NO';$('confirmChoice').textContent='NO';$('confirmValue').textContent='NO';$('confirmModal').style.display='flex'};
-$('confirmBack').onclick=()=>{$('confirmModal').style.display='none';pending=null};
-$('confirmGo').onclick=async()=>{if(!pending)return;$('confirmModal').style.display='none';try{await api('pick',{code:session.code,playerId:session.playerId,choice:pending});pending=null;setPage('progress');await refresh()}catch(e){toast(e.message)}};
-$('lockBtn').onclick=()=>{if(!lastState?.ownPick){pending=null;toast('Choose YES or NO first.')}}
-$('nextBtn').onclick=async()=>{try{await api('next',{code:session.code,hostToken:session.hostToken});await refresh()}catch(e){toast(e.message)}};
-$('championBtn').onclick=()=>setPage('leaderboard');
-$('navHome').onclick=()=>setPage('home');$('navGame').onclick=()=>session?setPage(lastState?.status==='Waiting'?'lobby':'prediction'):setPage('home');$('navFriends').onclick=()=>toast('Friends screen coming next.');$('navProfile').onclick=()=>toast('Profile screen coming next.');
-$('hostModal').onclick=e=>{if(e.target===$('hostModal'))$('hostModal').style.display='none'};
-try{session=JSON.parse(localStorage.getItem('hunchClubNetlifyV4')||'null')}catch{session=null}
-setPage('home');if(session)refresh();setInterval(()=>{if(session&&!busy)refresh()},3500);
-</script>
-</body>
-</html>
+function player(p,i){return `<div class="player"><span class="avatar">👤</span><span class="playerName">${esc(p.name)}${p.id===session?.playerId?' <span class="goldtext">(YOU)</span>':''}${i===0?' 👑':''}</span><span class="lifeHearts">${hearts(p)}</span><span class="shieldIcon">${p.alive?'🛡️':'OUT'}</span></div>`}
+function lobby(){viewName='lobby';setActive(1);const ps=state?.players||[];view.innerHTML=top('GAME LOBBY')+`<div class="panel"><div class="gameHeader"><div class="goldball">⚽</div><div><strong>Premier League Predictors</strong><div class="small">Created by: ${esc(state?.hostName||'')}</div><div class="small">👥 ${ps.length} / ${chosenPlayers} Players</div></div></div><div class="eyebrow center" style="margin-top:12px">SHARE THIS GAME CODE</div><div class="code">${esc(state?.code||session.code)}</div><button class="darkbtn" onclick="copyCode()">COPY GAME CODE</button></div><div class="panel">${ps.map(player).join('')||'<p class="small">Waiting for players…</p>'}</div>${session?.hostToken?'<button class="goldbtn" onclick="startGame()">START GAME</button>':'<p class="small center">Waiting for the host to start the game…</p>'}`;msg('')}
+function fixture(){return `<div class="banner">Premier League · Round ${state?.round||1}</div><div class="fixture"><div class="fixtureTeams"><div><div class="teamLogo">🔴</div><div class="teamName">LIVERPOOL</div></div><div class="versus">VS</div><div><div class="teamLogo">🔵</div><div class="teamName">MAN CITY</div></div></div></div>`}
+function game(){viewName='game';setActive(1);const picked=state?.ownPick,settled=['Settled','Finished'].includes(state?.status);let q=state?.question||{title:'Will there be a goal in the first half?',note:'Test question'};view.innerHTML=top('PREDICTION')+fixture()+`<div class="panel"><div class="question">${esc(q.title)}</div><p class="small center">${esc(q.note)}</p><div class="choices"><button class="yesbtn ${picked==='YES'?'selected':''}" ${picked||settled?'disabled':''} onclick="askPick('YES')">YES</button><button class="nobtn ${picked==='NO'?'selected':''}" ${picked||settled?'disabled':''} onclick="askPick('NO')">NO</button></div><div class="lifeBar"><span>Your Lives <span class="lifeHearts">${state?.ownAlive?'❤️❤️❤️':'🖤🖤🖤'}</span></span><span>Shield 🛡️</span></div><p class="small center">${picked?'🔒 HUNCH LOCKED — '+picked:'Choose your answer. It cannot be changed after locking.'}</p></div>${picked&&!settled?'<div class="panel center"><div style="font-size:32px">🔒</div><h2>Predictions locked!</h2><p class="small">Waiting for the result…</p></div>':''}${settled?resultContent():''}${session?.hostToken&&state?.status==='Started'?`<div class="panel"><div class="eyebrow">HOST CONTROL</div><h2>Reveal the result</h2><p class="small">Wait until every surviving player has locked their prediction.</p><div class="stack"><button class="goldbtn" onclick="askSettle('YES')">CORRECT ANSWER: YES</button><button class="darkbtn" onclick="askSettle('NO')">CORRECT ANSWER: NO</button></div></div>`:''}${session?.hostToken&&state?.status==='Settled'?'<button class="goldbtn" onclick="nextRound()">NEXT ROUND</button>':''}<div class="panel"><div class="eyebrow">PLAYERS</div>${(state?.players||[]).map(player).join('')}</div>`;msg('')}
+function resultContent(){return `<div class="resultPanel ${state?.ownAlive?'':'bad'}"><div style="font-size:34px">${state?.ownAlive?'✓':'✕'}</div><h2>${state?.ownAlive?'Correct!':'Eliminated'}</h2><div class="small">Correct answer: ${esc(state?.result)}</div></div>`}
+function champion(){viewName='champion';setActive(1);const winners=state?.winner||[];view.innerHTML=top('CHAMPION',false)+`<div class="winner"><div style="font-size:70px">👑</div><h2>CHAMPION</h2><p>You're the last one standing!</p><div class="trophy">🏆</div><h2 style="font-size:25px">${esc(winners[0]||'No surviving player')}</h2><button class="goldbtn" onclick="leaderboard()">VIEW FINAL STANDINGS</button></div>`;msg('')}
+function leaderboard(){viewName='leaderboard';setActive(1);view.innerHTML=top('LEADERBOARD')+`<div class="panel"><div class="eyebrow">CURRENT STANDINGS</div><div class="rank"><b>#</b><b>Player</b><b>Lives</b><b>Status</b></div>${(state?.players||[]).map((p,i)=>`<div class="rank"><span class="rankNum">${i+1}</span><b>${esc(p.name)}</b><span class="lifeHearts">${hearts(p)}</span><span class="status">${p.alive?'IN':'OUT'}</span></div>`).join('')}</div>`}
+function goBack(){if(viewName==='home')return;if(['create','join'].includes(viewName))home();else if(state?.status==='Waiting')lobby();else game()}
+function copyCode(){if(navigator.clipboard?.writeText)navigator.clipboard.writeText(session.code).then(()=>msg('Game code copied')).catch(()=>msg('Game code: '+session.code));else msg('Game code: '+session.code)}
+function openModal(o){$('modalIcon').textContent=o.icon||'🔒❤️';$('modalEye').textContent=o.eye||'CONFIRM YOUR HUNCH';$('modalTitle').textContent=o.title;$('modalDesc').textContent=o.desc;$('modalPreview').textContent=o.preview;$('modalOk').textContent=o.ok||'CONFIRM';modalAction=o.action;$('modal').classList.remove('hidden')}
+function closeModal(){modalAction=null;$('modal').classList.add('hidden')}
+$('modalCancel').onclick=closeModal;$('modalOk').onclick=async()=>{if(!modalAction)return;const fn=modalAction;closeModal();await fn()};document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+async function runAction(label,fn){if(busy)return;busy=true;msg(label);try{await fn()}catch(e){msg(e.message)}finally{busy=false}}
+async function createGame(){const n=$('hostName')?.value.trim();if(!n)return msg('Enter your name.');await runAction('Creating your game…',async()=>{const r=await api('create',{name:n});session=r;save();await refresh(true)})}
+async function joinGame(){const n=$('joinName')?.value.trim(),c=$('joinCode')?.value.trim().toUpperCase();if(!n||c.length!==6)return msg('Enter your name and six-character game code.');await runAction('Joining game…',async()=>{session=await api('join',{name:n,code:c});save();await refresh(true)})}
+async function startGame(){await runAction('Starting game…',async()=>{await api('start',{code:session.code,hostToken:session.hostToken});await refresh(true)})}
+function askPick(c){if(state?.ownPick)return;openModal({title:'Lock in your answer?',desc:'You have chosen '+c+'. Once locked, your prediction cannot be changed.',preview:c,ok:'🔒 LOCK IN MY HUNCH',action:()=>pick(c)})}
+async function pick(c){await runAction('Saving your hunch…',async()=>{await api('pick',{code:session.code,playerId:session.playerId,choice:c});await refresh(true)})}
+function askSettle(r){openModal({icon:'🏆',eye:'HOST · ROUND RESULT',title:'Reveal the correct answer?',desc:'Set '+r+' as the correct answer. Incorrect predictions will be eliminated.',preview:r,ok:'REVEAL RESULT',action:()=>settle(r)})}
+async function settle(r){await runAction('Revealing result…',async()=>{await api('settle',{code:session.code,hostToken:session.hostToken,result:r});await refresh(true)})}
+async function nextRound(){await runAction('Starting next round…',async()=>{await api('next',{code:session.code,hostToken:session.hostToken});await refresh(true)})}
+async function refresh(force=false){if(!session||busy&&!force)return;try{const s=await api('state');state=s;if(s.status==='Finished')champion();else if(s.status==='Waiting')lobby();else game()}catch(e){msg(e.message)}}
+$('tabHome').onclick=home;$('tabGame').onclick=()=>session?refresh(true):home();$('tabFriends').onclick=()=>msg('Friends features are planned, not active yet.');$('tabProfile').onclick=()=>msg('Profile features are planned, not active yet.');
+try{session=JSON.parse(localStorage.getItem('hunchClubNetlifyV4')||'null')}catch{session=null}home();if(session)refresh(true);setInterval(()=>{if(session&&!busy&&$('modal').classList.contains('hidden')&&['lobby','game','champion'].includes(viewName))refresh()},5000);
+</script></body></html>
